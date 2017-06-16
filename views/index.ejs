@@ -1,0 +1,191 @@
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Your site description." />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>新手爸媽救星</title>
+
+    <link href="responsive.min.css" rel="stylesheet" />
+</head>
+<body>
+    <script src="vendor/jquery-2.1.4.min.js"></script>
+    <script src="responsive.min.js"></script>
+
+
+    <div class="name">
+      <h3>新手爸媽救星</h3>
+    </div> 
+
+<!--nav-->
+<div class="container">
+    <div class="navbar_collapse_center">
+      <ul class="nav nav-tabs navbar_center">
+        <li class="active"><a data-toggle="tab"  href="#feed" class="navbar-inner">餵奶</a></li>
+        <li><a data-toggle="tab" href="#safety" class="navbar-inner">安全</a></li>
+        <li><a data-toggle="tab" href="#clothe" class="navbar-inner">著衣</a></li>
+      </ul>
+    </div>
+      
+
+  <div class="tab-content">
+
+<!--feed-餵奶-->
+
+  <div id="feed" class="tab-pane fade in active">        
+      <div class="pic">          
+          <!--餵奶圖片置換處-->
+          <img class="pic-feed" src="" alt="餵奶正確姿勢" width= "100%" height= "100%" id="pic-feed">
+      </div>
+
+      <div class="text">
+          <!--餵奶文字置換處-->
+          <h4 class="highlight"></h4>
+          <hr>
+          <p class="warning"></p>
+
+      </div>  
+  </div>
+
+ 
+<!--安全-safety-->  
+
+  <div id="safety" class="tab-pane fade">
+      <div class="pic">
+        <!--安全圖片置換處-->
+          <img class="pic-safety" src="http://1.bp.blogspot.com/-_2qFHh9pPIw/TgY5eOHEmWI/AAAAAAAAUhw/F-KJzTESeds/s1600/Paper+Doll+Mate_0010.jpg" alt="安全距離顯示" width= "100%" height= "50%" id="pic-safety">
+      </div>
+
+      <div class="text">
+        <!--距離文字置換處-->
+          <h4><strong>安全距離監測</strong>  輸入偵測的距離 </h4>
+          <hr>
+          <p class="dist_warning"></p>
+        <!--
+          <img class="distance" src="http://wallpapercave.com/wp/f2nbsPJ.jpg" alt="距離文字" width= "100%" height= "100%" >
+        -->
+        <button type="button" class="btn btn-default" style="background-color:#FFF5E6">
+          <span class="glyphicon glyphicon-play"></span> 播放音樂轉移注意力
+        </button>
+      </div> 
+  </div>
+
+  
+<!--著衣-clothe-->
+
+  <div id="clothe" class="tab-pane fade">
+      <div class="pic">
+        <!--著衣圖片置換處-->
+        <img class="pic-clothe" src="" alt="安全距離顯示" width= "100%" height= "100%" id="pic-clothes">
+      </div>
+
+      <div class="text">
+          <!--著衣文字置換處-->
+          <h4 class="temp"></h4> 
+          <div class="clothes"></div>
+        <!--
+          <img class="feed" src="http://wallpapercave.com/wp/f2nbsPJ.jpg" alt="餵奶文字" width= "100%" height= "100%" >
+        -->
+      </div> 
+  </div>
+
+
+
+  </div>
+</div>
+</body>
+
+
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:3000');
+  socket.on('news', function (data) {
+    console.log(data);
+
+    angular_data(data);
+
+    distance_data(data);
+
+    temp_data_and_clothes(data);
+
+    // socket.emit('my other event', { my: 'data' });
+  });
+
+  function temp_data_and_clothes(data){
+    $('.temp').html('<strong>今天為你推薦</strong>  溫度 :'+ data.temperature  +'°C');
+
+    $('.clothes > p').remove();
+    data.clothes.forEach(function(clothe){
+      console.log(clothe);
+      
+      $('.clothes').append('<p>'+clothe.name+'</p>');
+    });
+
+    var len = data.clothes.length;
+    document.getElementById("pic-clothes").setAttribute("src", data.clothes[len-1].image_url );
+
+
+  }
+
+  function distance_data(data){
+
+    if(data.distance < 30){
+      $('.dist_warning').html('啊，危險！快轉移寶寶注意力！');
+      document.getElementById("pic-safety").setAttribute("src", "http://i.imgur.com/gSTPxjD.png");
+    }
+    else if(data.distance < 70){
+      $('.dist_warning').html('寶寶快要接近危險物囉！');
+      document.getElementById("pic-safety").setAttribute("src", "http://i.imgur.com/VIhb3t0.png");
+    }
+    else{
+      $('.dist_warning').html('寶寶很安全，別擔心！');
+      document.getElementById("pic-safety").setAttribute("src", "http://i.imgur.com/AqJ1QTV.png");
+    }
+  }
+
+  function angular_data(data){
+    if(data.angulardata < 80){
+      document.getElementById("pic-feed").setAttribute("src", "http://i.imgur.com/9GMrLBO.png");
+      $('.highlight').html('<strong>餵奶姿勢過低</strong>');
+      $('.warning').html('餵奶姿勢應介於45-60度間，寶寶才不會嗆到哦！');
+
+      document.getElementById("pic-feed").setAttribute("src", "http://i.imgur.com/9GMrLBO.png");
+      $('.highlight').html('<strong>餵奶姿勢過高</strong>');
+      $('.warning').html('餵奶姿勢應介於45-60度間，寶寶才不會嗆到哦！');
+
+    }
+
+    else if(data.angulardata > 150){
+      document.getElementById("pic-feed").setAttribute("src", "http://i.imgur.com/9GMrLBO.png");
+      $('.highlight').html('<strong>餵奶姿勢過高</strong>');
+      $('.warning').html('餵奶姿勢應介於45-60度間，寶寶才不會嗆到哦！');
+    }
+
+    else if(data.angulardata > 130){
+      document.getElementById("pic-feed").setAttribute("src", "http://i.imgur.com/yKdgkB3.png");
+      $('.highlight').html('<strong>別忘了幫寶寶拍嗝！</strong>');
+      $('.warning').html('支撐嬰兒頭、頸及臀部，將寶寶抱直坐在腿上，一手支撐嬰兒臀部，另一手掌呈杯狀，與寶寶背部呈直角，<br />由下往上慢慢輕拍寶寶背部，將胃內空氣排出，直到寶寶打嗝;如果無法排出氣體，可以抱著寶寶走走！');
+      
+    }
+
+    else{
+      document.getElementById("pic-feed").setAttribute("src", "http://i.imgur.com/PeGbJza.png");
+      $('.highlight').html('<strong>正確餵奶姿勢</strong>');
+      $('.warning').html('姿勢正確！繼續保持喔！');
+    }
+
+  }
+
+</script>
+
+</html>
